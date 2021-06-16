@@ -1,6 +1,4 @@
-#include <stdio.h>
-
-static int num; // 8 bits will be the limit
+#include "union.h"
 
 int init_num(int n){
     if (n > 0xFF) return -1;
