@@ -2,7 +2,7 @@
 import socket
 import time
 
-host = "127.0.0.1" 
+host = "192.168.2.1" 
 port = 8080 
 
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -18,12 +18,12 @@ while True:
     
     if rcvmsg == 'end':
         break
-    rcv = rcvmsg.decode()
+    
     fs = open('./data/snum2.txt','w')
-    fs.write(rcv)
+    fs.write(rcvmsg)
     fs.close()
 
-    
+    print 'Received -> %s' % (rcvmsg)
 
     s_msg = fl.read()
     client.send(s_msg) 
