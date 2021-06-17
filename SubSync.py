@@ -2,7 +2,7 @@
 import socket
 import time
 
-host = "192.168.2.1" 
+host = "192.168.2.7" 
 port = 8080 
 
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -12,14 +12,14 @@ client.connect((host, port))
 
 
 while True:
-    fl = open('./data/lnum2.txt','r')
+    fl = open('./data/lnum.txt','r')
     
     rcvmsg = client.recv(1024)
     
     if rcvmsg == 'end':
         break
     
-    fs = open('./data/snum2.txt','w')
+    fs = open('./data/snum.txt','w')
     fs.write(rcvmsg)
     fs.close()
 

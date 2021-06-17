@@ -2,7 +2,7 @@
 import socket
 import time
 
-host = "192.168.2.1" 
+host = "192.168.2.7" 
 port = 8080 
 
 serversock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
