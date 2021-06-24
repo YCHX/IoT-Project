@@ -20,7 +20,7 @@ static void __iomem *g_ioremap_addr;
 static int probe(struct platform_device *pdev);
 static int remove(struct platform_device *pdev);
 
-static struct of_device_id driver_dt_ids[] = {
+static struct of_device_id test_driver_dt_ids[] = {
 	{
 		.compatible = "altr,pio-20.10"
 	},
@@ -33,7 +33,7 @@ static struct platform_driver driver = {
 	.driver = {
 		.name = "Dev-driver",
 		.owner = THIS_MODULE,
-		.of_match_table = driver_dt_ids,
+		.of_match_table = test_driver_dt_ids,
 	},
 };
 
@@ -102,7 +102,7 @@ remove(struct platform_device *pdev)
 	return 0;
 }
 
-MODULE_DEVICE_TABLE(of, driver_dt_ids);
+MODULE_DEVICE_TABLE(of, test_driver_dt_ids);
 
 MODULE_LICENSE("GPL");
 
