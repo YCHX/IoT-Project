@@ -15,11 +15,10 @@
 #define HW_REGS_MASK (HW_REGS_SPAN - 1)
 
 int 
-send()
+main()
 {
     void *virtual_base;
     int fd;
-    int sfd;
     int send_mask;
     void *h2p_lw_led_addr;
 
@@ -38,8 +37,18 @@ send()
         + ((unsigned long)(ALT_LWFPGASLVS_OFST + MYPIO_0_BASE)
             & (unsigned long)(HW_REGS_MASK));
     
+    //Send to FPGA
     while (1){
         *(uint32_t *)h2p_lw_led_addr = get_total();
         usleep(200*100);
+        if (end_flag) break;
     }
+
+    if (munmap( virtual_base, HW_REGS_SPAN ) != 0) {
+        printf("ERROR: munmap() failed...\n");
+        close(fd);
+        return 1;
+    }
+    close(fd);
+    return 0;
 }

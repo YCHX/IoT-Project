@@ -1,6 +1,6 @@
 #include "union.h"
 
-int main(void){
+void notm(void){
     FILE *tmp;
     int a = 0;
     while (a < 100){
