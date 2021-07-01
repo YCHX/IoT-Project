@@ -53,22 +53,25 @@ static struct platform_driver driver = {
 static int debug_open(struct inode *inode, struct file *file)
 {
 	printk("debug_open\n");
-	debug_read_size = 4;
+	//debug_read_size = 4;
 	return 0;
 }
 
 static ssize_t debug_read(struct file *filp, char __user *buf, size_t count, loff_t *f_pos)
 {
+	int len;
 	printk("debug_read\n");
 	printk("read_size: %d\n",debug_read_size);
-
+	
 	if (debug_read_size > 0){
-		int len;
+		
+		//snprintf(itrpt_flag, sizeof(itrpt_flag), "%lu", (unsigned long)iore);
 		len = sprintf(buf, "%s\n", itrpt_flag);
-		debug_read_size -= 4;
+		debug_read_size = 0;
 		
 		return len;
 	}else{
+		len = sprintf(buf, "e");
 		return 0;
 	}
 }
@@ -97,6 +100,21 @@ interrupt(int irq, void *dev_id)
 		pr_info("Interrupt %d occured\n", irq);
 		io_result = ioread32(g_ioremap_addr);
 		pr_info("pio: %x\n", io_result);
+		switch (io_result){
+			case 0:
+				itrpt_flag[0] = '0';
+				break;
+			case 1:
+				itrpt_flag[0] = '1';
+				break;
+			case 2:
+				itrpt_flag[0] = '2';
+				break;
+			case 3:
+				itrpt_flag[0] = '3';
+				break;
+		}
+		debug_read_size = 4;
 		/* reset edgecapture register */
 		iowrite32(0xf, g_ioremap_addr+12);
 		return IRQ_HANDLED;
@@ -198,6 +216,11 @@ remove(struct platform_device *pdev)
 {
 	pr_info("test_remove\n");
 
+	free_irq(g_irq, &driver);
+
+	iounmap(g_ioremap_addr);
+	release_mem_region(g_base_addr, g_size);
+
 	if (down_interruptible(&g_dev_probe_sem))
 		return -ERESTARTSYS;
 	g_platform_probe_flag = 0;
@@ -215,6 +238,7 @@ init(void)
 	int ret;
     int err;
     dev_t dev;
+	int alloc_ret ;
 
 	pr_info("test_init_enter\n");
 	sema_init(&g_dev_probe_sem, 1);
@@ -227,7 +251,7 @@ init(void)
 	}
 	pr_info("dev-driver registerd\n");
 
-	int alloc_ret ;
+	
 	
 
 	alloc_ret = alloc_chrdev_region(&dev, MINOR_BASE,MINOR_NUM, "test_driver");
@@ -275,11 +299,12 @@ init(void)
 static void
 driver_exit(void)
 {
+	dev_t dev;
 	pr_info("do exit for dev-driver\n");
 	platform_driver_unregister(&driver);
 	pr_info("exit from dev-driver\n");
 
-	dev_t dev = MKDEV(mydevice_major, MINOR_BASE);
+	dev = MKDEV(mydevice_major, MINOR_BASE);
 	
 		device_destroy(mydevice_class, MKDEV(mydevice_major, 0));
 	
