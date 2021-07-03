@@ -135,7 +135,7 @@ int main(void){
         usleep(100000);
     }
     if (read(fd, buf,4)<0) perror("read");
-    printf("%s",buf);
+    //printf("%s",buf);
 
     if (buf[0]!='e') {
         interval = 0;
@@ -204,7 +204,7 @@ int main(void){
     
         }else{
             interval++;
-            printf("-%d-",interval);
+            //printf("-%d-",interval);
             if (zero_trigger){
                 if (interval > ZERO_TRIGGER_LEVEL){
                     trigger = 1;
