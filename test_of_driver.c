@@ -140,7 +140,7 @@ int main(void){
     if (buf[0]!='e') {
         interval = 0;
         if (wait) {
-            data[count] = buf[0] + '0';
+            data[count] = buf[0] - '0';
             if (buf[0] == '0'){
                 zero_trigger = 1;
             }
