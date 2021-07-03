@@ -5,9 +5,10 @@
 #include <errno.h>
 
 #define DATA_SIZE 65535
-#define TRIGGER_LEVEL 5
-#define BOOSTED_TRIGGER_LEVEL 10
-#define JUDGE_LEVEL 20
+#define TRIGGER_LEVEL 13
+#define ZERO_TRIGGER_LEVEL 6
+#define BOOSTED_TRIGGER_LEVEL 20
+#define JUDGE_LEVEL 30
 
 int _judge(int ap1, int ap2, int ap3){
     if ((ap1 < ap3)&&(ap3 < ap2)){
@@ -85,13 +86,13 @@ int main(void){
     int dominate = 0, dominate_flag = 0;
     int wait = 0;
     int count = 0;
-    int trigger;
+    int trigger, zero_trigger;
     int fd;
 
     if ((fd = open("/dev/test_device0", O_RDONLY))<0) perror("open");
 
     printf("\n");
-    printf("Initializing on progress...\n");
+    printf("Initializing in progress...\n");
     printf("\n");
     printf("It will take several seconds.\n");
     printf("\n");
@@ -129,9 +130,9 @@ int main(void){
     }
     //***SLEEP*** (Significant because if no sleep the system will hang up)
     if (boost){
-        usleep(100000);
+        usleep(50000);
     }else {
-        usleep(200000);
+        usleep(100000);
     }
     if (read(fd, buf,4)<0) perror("read");
     printf("%s",buf);
@@ -140,6 +141,9 @@ int main(void){
         interval = 0;
         if (wait) {
             data[count] = buf[0] + '0';
+            if (buf[0] == '0'){
+                zero_trigger = 1;
+            }
             count++;
             continue;
         }
@@ -163,7 +167,7 @@ int main(void){
             }
             data[count] = 0;
             count++;
-
+            zero_trigger = 1;
             break;
         case '1':
             if (dominate_flag){
@@ -172,7 +176,7 @@ int main(void){
             }
             data[count] = 1;
             count++;
-            
+            zero_trigger = 0;
             break;
         case '2':
             if (dominate_flag){
@@ -181,7 +185,7 @@ int main(void){
             }
             data[count] = 2;
             count++;
-            
+            zero_trigger = 0;
 
             break;
         case '3':
@@ -191,7 +195,7 @@ int main(void){
             }
             data[count] = 3;
             count++;
-
+            zero_trigger = 0;
             break;
         
         default:
@@ -201,9 +205,17 @@ int main(void){
         }else{
             interval++;
             printf("-%d-",interval);
-            if (interval > TRIGGER_LEVEL){
-                trigger = 1;
-                wait = 0;
+            if (zero_trigger){
+                if (interval > ZERO_TRIGGER_LEVEL){
+                    trigger = 1;
+                    wait = 0;
+                    zero_trigger = 0;
+                }
+            }else{
+                if (interval > TRIGGER_LEVEL){
+                    trigger = 1;
+                    wait = 0;
+                }
             }
             if (boost){
                 if (interval > BOOSTED_TRIGGER_LEVEL){
