@@ -75,7 +75,7 @@ int judge(int data[DATA_SIZE], int count){
     ap2 /= (float)c2;
     ap3 /= (float)c3;
 
-    return 0;
+    return _judge(ap1,ap2,ap3);
 }
 
 int main(void){
