@@ -275,6 +275,9 @@ int main(void){
                             clear(data);
                             count = 0;
                             interval = 0;
+                        }else{
+                            data[count] = before;
+                            count++;
                         }
                         
                     }
