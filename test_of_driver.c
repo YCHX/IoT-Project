@@ -102,6 +102,7 @@ int main(void){
     printf("\n");
     while (1){
         printf(". . .");
+        usleep(10000);
         read(fd, buf,4);
         if (buf[0] == '0'){
             break;
