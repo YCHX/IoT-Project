@@ -126,14 +126,7 @@ int main(void){
     printf("\n");
     printf("If there are objects, the sensor may give a wrong feedback\n");
     printf("\n");
-    // while (1){
-    //     printf(". . .");
-    //     usleep(10000);
-    //     read(fd, buf,4);
-    //     if (buf[0] == '0'){
-    //         break;
-    //     }
-    // }
+    //No init any more!
     printf("\n");
     printf("Initialization Complete!\n");
 
@@ -170,7 +163,7 @@ int main(void){
         usleep(100000);
     }
     if (read(fd, buf,4)<0) perror("read");
-    printf("%s",buf);
+    //printf("%s",buf);
 
     if (buf[0]!='e') {
         interval = 0;
@@ -244,7 +237,7 @@ int main(void){
     
         }else{
             interval++;
-            printf("-%d-",interval);
+            //printf("-%d-",interval);
             if (zero_trigger){
                 if (interval > ZERO_TRIGGER_LEVEL){
                     trigger = 1;
