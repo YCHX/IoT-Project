@@ -10,6 +10,28 @@
 #define BOOSTED_TRIGGER_LEVEL 20
 #define JUDGE_LEVEL 30
 
+int __judge(float ap1, float ap2, float ap3){
+    if ((ap1 < ap3)&&(ap3 < ap2)){
+        return 1;
+    }
+    if ((ap2 < ap3)&&(ap3 < ap1)){
+        return 2;
+    }
+    if ((ap3 >= ap1)&&(ap1 > ap2)){
+        return 2;
+    }
+    if ((ap3 >= ap2)&&(ap2 > ap1)){
+        return 1;
+    }
+    if ((ap3 <= ap1)&&(ap1 < ap2)){
+        return 1;
+    }
+    if ((ap3 <= ap2)&&(ap2 < ap1)){
+        return 2;
+    }
+    return (int)ap3%2+1;
+}
+
 int _judge(float ap1, float ap2, float ap3){
     if ((ap1 < ap3)&&(ap3 < ap2)){
         return 1;
@@ -38,9 +60,9 @@ void clear(int data[DATA_SIZE]){
     }
 }
 
-int judge(int data[DATA_SIZE], int count){
+int judge(int data[DATA_SIZE], int count, int opt){
     float ap1 = 0, ap2 = 0, ap3 = 0;
-    int c1 = 0, c2 = 0, c3 = 0;
+    int c0 = 0, c1 = 0, c2 = 0, c3 = 0;
     if (data[0] == 1){
         return 1;
     }
@@ -49,6 +71,9 @@ int judge(int data[DATA_SIZE], int count){
     }
     for (int i = 0; i < count; i++){
         switch (data[i]){
+            case 0:
+                c0++;
+                break;
             case 1:
                 c1++;
                 ap1 += i;
@@ -65,11 +90,17 @@ int judge(int data[DATA_SIZE], int count){
             break;
         }
     }
+    if (c0 > count / 2){
+        return 0;
+    }
     ap1 /= (float)c1;
     ap2 /= (float)c2;
     ap3 /= (float)c3;
-
-    return _judge(ap1,ap2,ap3);
+    if (opt){
+        return _judge(ap1,ap2,ap3);
+    }else{
+        return __judge(ap1,ap2,ap3);
+    }
 }
 
 int main(void){
@@ -112,7 +143,7 @@ int main(void){
         //Overflow dealing
 
     } else if (count >= JUDGE_LEVEL){
-        dominate = judge(data, count);
+        dominate = judge(data, count, 1);
         if (dominate == 1){
             printf("enter\n");
             wait = 1;
@@ -229,17 +260,23 @@ int main(void){
             if (boost){
                 if (interval > BOOSTED_TRIGGER_LEVEL){
                     if (!wait){
-                        dominate = judge(data, count);
+                        dominate = judge(data, count, 0);
                         if (dominate == 1){
                             printf("enter\n");
+                            trigger = 1;
+                            boost = 0;
+                            clear(data);
+                            count = 0;
+                            interval = 0;
                         }else if (dominate == 2){
                             printf("leave\n");
+                            trigger = 1;
+                            boost = 0;
+                            clear(data);
+                            count = 0;
+                            interval = 0;
                         }
-                        trigger = 1;
-                        boost = 0;
-                        clear(data);
-                        count = 0;
-                        interval = 0;
+                        
                     }
                 }else{
                     data[count] = before;
