@@ -1,7 +1,9 @@
+# -*- coding:utf-8 -*-
 import requests
+import sys
 
 def main():
-    send_notify('Test from Mac.')
+    send_notify('人数オーバーしました．現在の人数: ' + sys.argv[1])
 
 def send_notify(notification_message):
     

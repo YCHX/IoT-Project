@@ -1,7 +1,9 @@
 #include "union.h"
 
 void notify(){
-    system("python ./Notify.py");
+    char x[100];
+    sprintf(x,"python ./Notify.py %d",get_total());
+    system(x);
 }
 
 void for_sync(){

@@ -1,109 +1,7 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <errno.h>
+#include "union.h"
 
-#define DATA_SIZE 65535
-#define TRIGGER_LEVEL 13
-#define ZERO_TRIGGER_LEVEL 6
-#define BOOSTED_TRIGGER_LEVEL 20
-#define JUDGE_LEVEL 30
-
-int __judge(float ap1, float ap2, float ap3){
-    if ((ap1 < ap3)&&(ap3 < ap2)){
-        return 1;
-    }
-    if ((ap2 < ap3)&&(ap3 < ap1)){
-        return 2;
-    }
-    if ((ap3 >= ap1)&&(ap1 > ap2)){
-        return 2;
-    }
-    if ((ap3 >= ap2)&&(ap2 > ap1)){
-        return 1;
-    }
-    if ((ap3 <= ap1)&&(ap1 < ap2)){
-        return 1;
-    }
-    if ((ap3 <= ap2)&&(ap2 < ap1)){
-        return 2;
-    }
-    return (int)ap3%2+1;
-}
-
-int _judge(float ap1, float ap2, float ap3){
-    if ((ap1 < ap3)&&(ap3 < ap2)){
-        return 1;
-    }
-    if ((ap2 < ap3)&&(ap3 < ap1)){
-        return 2;
-    }
-    // if ((ap3 >= ap1)&&(ap1 > ap2)){
-    //     return 2;
-    // }
-    // if ((ap3 >= ap2)&&(ap2 > ap1)){
-    //     return 1;
-    // }
-    // if ((ap3 <= ap1)&&(ap1 < ap2)){
-    //     return 1;
-    // }
-    // if ((ap3 <= ap2)&&(ap2 < ap1)){
-    //     return 2;
-    // }
-    return 0;
-}
-
-void clear(int data[DATA_SIZE]){
-    for (int i = 0; i < 25; i++){
-        data[i] = -1;
-    }
-}
-
-int judge(int data[DATA_SIZE], int count, int opt){
-    float ap1 = 0, ap2 = 0, ap3 = 0;
-    int c0 = 0, c1 = 0, c2 = 0, c3 = 0;
-    if (data[0] == 1){
-        return 1;
-    }
-    if (data[0] == 2){
-        return 2;
-    }
-    for (int i = 0; i < count; i++){
-        switch (data[i]){
-            case 0:
-                c0++;
-                break;
-            case 1:
-                c1++;
-                ap1 += i;
-            break;
-            case 2:
-                c2++;
-                ap2 += i;
-            break;
-            case 3:
-                c3++;
-                ap3 += i;
-            break;
-            default:
-            break;
-        }
-    }
-    if (c0 > count / 2){
-        return 0;
-    }
-    ap1 /= (float)c1;
-    ap2 /= (float)c2;
-    ap3 /= (float)c3;
-    if (opt){
-        return _judge(ap1,ap2,ap3);
-    }else{
-        return __judge(ap1,ap2,ap3);
-    }
-}
-
-int main(void){
+int main(int argc, char** agrv){
+    //for sensor
     char buf[10];
     int data[DATA_SIZE];
     int before = 0;
@@ -114,9 +12,40 @@ int main(void){
     int count = 0;
     int trigger, zero_trigger;
     int fd;
+    //for send
+    void *virtual_base;
+    int fds;
+    int send_mask;
+    void *h2p_lw_led_addr;
+    int total;
 
+
+    if (argc == 3){
+        init_num(atoi(argv[1],atoi(argv[2])));
+    }else{
+        init_num(0,10);
+    }
+
+    //open sensor device file
     if ((fd = open("/dev/test_device0", O_RDONLY))<0) perror("open");
 
+    //set sending mask
+    if ((fds = open( "/dev/mem", (O_RDWR|O_SYNC))) == -1) {
+        printf("ERROR: could not open \"/dev/mem\"...\n");
+        return 1;
+    }
+    virtual_base = mmap(NULL, HW_REGS_SPAN, (PROT_READ|PROT_WRITE),
+                        MAP_SHARED, fds, HW_REGS_BASE);
+    if (virtual_base == MAP_FAILED) {
+        printf("ERROR: mmap() failed...\n");
+        close(fds);
+        return 1;
+    }
+    h2p_lw_led_addr = virtual_base
+        + ((unsigned long)(ALT_LWFPGASLVS_OFST + MYPIO_0_BASE)
+            & (unsigned long)(HW_REGS_MASK));
+
+    //init message (actually no init, just prints)
     printf("\n");
     printf("Initializing in progress...\n");
     printf("\n");
@@ -131,6 +60,21 @@ int main(void){
     printf("Initialization Complete!\n");
 
     while (1){
+    //prepare for syncing
+    //for_sync();
+    
+    //send to fpga
+    total = num;
+    *(uint32_t *)h2p_lw_led_addr = total;
+    
+    //check the limit
+    // if ((total > limit)){
+    //     if (notify_changed != total){
+    //         notify();
+    //         notify_changed = total;
+    //     }
+    // }
+
     if (count >= DATA_SIZE){
         printf("data overflow\n");
         //Overflow dealing
@@ -139,6 +83,7 @@ int main(void){
         dominate = judge(data, count, 1);
         if (dominate == 1){
             printf("enter\n");
+            in();
             wait = 1;
             boost = 0;
             clear(data);
@@ -146,6 +91,7 @@ int main(void){
             interval = 0;
         }else if (dominate == 2){
             printf("leave\n");
+            out();
             wait = 1;
             boost = 0;
             clear(data);
@@ -256,6 +202,7 @@ int main(void){
                         dominate = judge(data, count, 0);
                         if (dominate == 1){
                             printf("enter\n");
+                            in();
                             trigger = 1;
                             boost = 0;
                             clear(data);
@@ -263,6 +210,7 @@ int main(void){
                             interval = 0;
                         }else if (dominate == 2){
                             printf("leave\n");
+                            out();
                             trigger = 1;
                             boost = 0;
                             clear(data);
@@ -285,5 +233,11 @@ int main(void){
 
     }
     if (close(fd) !=0) perror("close");
-
+    if (munmap( virtual_base, HW_REGS_SPAN ) != 0) {
+        printf("ERROR: munmap() failed...\n");
+        close(fds);
+        return 1;
+    }
+    close(fd);
 }
+
