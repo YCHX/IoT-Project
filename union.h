@@ -33,6 +33,8 @@ int init_num(int n);
 int get_num();
 int in();
 int out();
+FILE *fn;
+FILE *fs;
 
 void for_sync();
 void notify();

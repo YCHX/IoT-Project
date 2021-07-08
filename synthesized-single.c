@@ -1,6 +1,6 @@
 #include "union.h"
 
-int main(int argc, char** agrv){
+int main(int argc, char** argv){
     //for sensor
     char buf[10];
     int data[DATA_SIZE];
@@ -21,7 +21,7 @@ int main(int argc, char** agrv){
 
 
     if (argc == 3){
-        init_num(atoi(argv[1],atoi(argv[2])));
+        init_num(atoi(argv[1]),atoi(argv[2]));
     }else{
         init_num(0,10);
     }
@@ -67,6 +67,7 @@ int main(int argc, char** agrv){
     total = num;
     *(uint32_t *)h2p_lw_led_addr = total;
     
+    
     //check the limit
     // if ((total > limit)){
     //     if (notify_changed != total){
@@ -109,9 +110,10 @@ int main(int argc, char** agrv){
         usleep(100000);
     }
     if (read(fd, buf,4)<0) perror("read");
-    printf("%s",buf);
+    
 
     if (buf[0]!='e') {
+        printf("%s",buf);
         interval = 0;
         if (wait) {
             data[count] = buf[0] - '0';
