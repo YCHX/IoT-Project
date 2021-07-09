@@ -28,7 +28,7 @@ while True:
     fs.write(rcvmsg)
     fs.close()
 
-    print 'Received -> %s' % (rcvmsg)
+    print 'Sync -> %s' % (rcvmsg)
 
     
 

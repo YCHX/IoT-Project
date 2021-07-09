@@ -29,7 +29,7 @@ int notify_changed;
 
 int end_flag;
 
-int init_num(int n);
+int init_num(int n,int l);
 int get_num();
 int in();
 int out();
@@ -40,6 +40,7 @@ void for_sync();
 void notify();
 int get_sync();
 int get_total();
+void reset_sync();
 
 int __judge(float ap1, float ap2, float ap3);
 int _judge(float ap1, float ap2, float ap3);

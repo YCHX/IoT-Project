@@ -15,7 +15,6 @@ int main(int argc, char** argv){
     //for send
     void *virtual_base;
     int fds;
-    int send_mask;
     void *h2p_lw_led_addr;
     int total;
 
@@ -24,7 +23,9 @@ int main(int argc, char** argv){
         init_num(atoi(argv[1]),atoi(argv[2]));
     }else{
         init_num(0,10);
+        
     }
+    reset_sync();
 
     //open sensor device file
     if ((fd = open("/dev/test_device0", O_RDONLY))<0) perror("open");

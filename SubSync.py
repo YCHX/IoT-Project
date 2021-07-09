@@ -23,7 +23,7 @@ while True:
     fs.write(rcvmsg)
     fs.close()
 
-    print 'Received -> %s' % (rcvmsg)
+    print 'Sync -> %s' % (rcvmsg)
 
     s_msg = fl.read()
     client.send(s_msg) 

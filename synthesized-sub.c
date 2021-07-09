@@ -23,8 +23,10 @@ int main(int argc, char** argv){
         init_num(atoi(argv[1]),atoi(argv[2]));
     }else{
         init_num(0,10);
+        
     }
 
+    reset_sync();
     //open sensor device file
     if ((fd = open("/dev/test_device0", O_RDONLY))<0) perror("open");
 
@@ -60,20 +62,13 @@ int main(int argc, char** argv){
 
     while (1){
     //prepare for syncing
-    //for_sync();
+    for_sync();
     
     //send to fpga
-    total = num;
+    total = get_total();
     *(uint32_t *)h2p_lw_led_addr = total;
     
     
-    //check the limit
-    // if ((total > limit)){
-    //     if (notify_changed != total){
-    //         notify();
-    //         notify_changed = total;
-    //     }
-    // }
 
     if (count >= DATA_SIZE){
         printf("data overflow\n");
@@ -109,10 +104,9 @@ int main(int argc, char** argv){
         usleep(100000);
     }
     if (read(fd, buf,4)<0) perror("read");
-    
+    printf("%s",buf);
 
     if (buf[0]!='e') {
-        printf("%s",buf);
         interval = 0;
         if (wait) {
             data[count] = buf[0] - '0';
